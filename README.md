@@ -1,7 +1,8 @@
 
 Synopsis:
 -----------------------------------
-Creates sysmon configuration xml for monitoring of autorun registry keys
+Creates sysmon configuration xml for monitoring of autorun registry keys.  
+Obtains list of autorun keys to monitor by trasforming output of command line version of [sysinternals autoruns](https://technet.microsoft.com/en-us/sysinternals/bb963902). 
 
 Usage:  
 -----------------------------------
