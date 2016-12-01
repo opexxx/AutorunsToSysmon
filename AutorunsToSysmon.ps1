@@ -12,7 +12,8 @@ $tmpfile = ($env:TEMP + '\autoruns_results.csv')
 $outfile = ($env:TEMP + '\sysmon_autoruns_rules.xml')
 
 # run autoruns and write stdout to CSV
-#start-Process -FilePath $autoruns -ArgumentList $arguments -RedirectStandardOutput $tmpfile
+write-host ('Launching ' + $autoruns + ' with arguments ' + $arguments)
+start-Process -FilePath $autoruns -ArgumentList $arguments -RedirectStandardOutput $tmpfile -Wait
 
 # read CSV into object and dedup entry locations
 $entries = Import-Csv -Path $tmpfile -Delimiter "`t" | Select-Object -Property 'Entry Location' -Unique
