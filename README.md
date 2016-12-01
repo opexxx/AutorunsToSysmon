@@ -8,7 +8,7 @@ Obtains list of autorun keys to monitor by transforming output of command line v
 
 Usage:  
 -----------------------------------
-powershell.exe -file .\AutorunsToSysmon.ps1
+powershell.exe -file .\AutorunsToSplunkAndSysmon.ps1
 
 Requirements:
 -----------------------------------
