@@ -41,11 +41,11 @@ if ($entries) {
     }
 
     if (Get-Item($outfile_sysmon)) {
-        Remove-Item -path $outfile_sysmon -Force
-    } $outfile_splunk
+        Remove-Item -path $outfile_sysmon -Force | Out-Null
+    } 
 
     if (Get-Item($outfile_splunk)) {
-        Remove-Item -path $outfile_splunk -Force
+        Remove-Item -path $outfile_splunk -Force | Out-Null
     }
 
     $keys = $keys | Sort-Object
@@ -57,7 +57,7 @@ if ($entries) {
         $key = $key -replace '\\','\\'
         add-content -path $outfile_splunk -value ('')
         add-content -path $outfile_splunk -value ('[WinRegMon://autoruns_entry_' + $item + ']')
-        add-content -path $outfile_splunk -value ('hive = ' + $key + '.*')
+        add-content -path $outfile_splunk -value ('hive = .*' + $key + '.*')
         add-content -path $outfile_splunk -value ("disabled = false")
         add-content -path $outfile_splunk -value ("proc = .*")
         add-content -path $outfile_splunk -value ("type = set|create|delete|rename")
@@ -68,12 +68,12 @@ if ($entries) {
 
     # output to sysmon
 
-    add-content -path $outfile -value '<RegistryEvent onmatch="include">' 
+    add-content -path $outfile_sysmon -value '<RegistryEvent onmatch="include">' 
     $keys = $keys | Sort-Object
     foreach ($key in $keys) {
-        add-content -path $outfile -value ("`t" + '<TargetObject condition="contains">' + $key + '</TargetObject>')
+        add-content -path $outfile_sysmon -value ("`t" + '<TargetObject condition="contains">' + $key + '</TargetObject>')
     }
-    add-content -path $outfile -value '</RegistryEvent>'
+    add-content -path $outfile_sysmon -value '</RegistryEvent>'
 
     #open the file in notepad
     start-Process -FilePath ($env:windir + '\notepad.exe') -ArgumentList $outfile_sysmon
