@@ -14,7 +14,7 @@ $outfile_splunk = ($env:TEMP + '\splunk_autoruns_inputs.conf')
 
 # run autoruns and write stdout to CSV
 write-host ('Launching ' + $autoruns + ' with arguments ' + $arguments)
-#start-Process -FilePath $autoruns -ArgumentList $arguments -RedirectStandardOutput $tmpfile -Wait
+start-Process -FilePath $autoruns -ArgumentList $arguments -RedirectStandardOutput $tmpfile -Wait
 
 # read CSV into object and dedup entry locations
 $entries = Import-Csv -Path $tmpfile -Delimiter "`t" | Select-Object -Property 'Entry Location' -Unique
