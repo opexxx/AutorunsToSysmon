@@ -3,7 +3,8 @@ Synopsis:
 -----------------------------------
 Creates sysmon configuration xml for monitoring of autorun registry keys
 
-UserEventToSpeech Usage:  
+Usage:  
+-----------------------------------
 powershell.exe -file .\AutorunsToSysmon.ps1
 
 Requirements:
