@@ -1,35 +1,46 @@
-﻿
-<#
+﻿<#
 .Synopsis
-   Creates sysmon configuration xml for monitoring of autorun registry keys
-   version 1.2.0
+   Creates sysmon and splunk configuration files for monitoring of changes to auto start extensibility points (aseps) 
+   by transforming text-based output of sysinternals autoruns utility.
+.DESCRIPTION
+   For best results, ensure that all "Hide" options in autoruns are unchecked.
 #>
 
-# path to autoruns (todo: make $autoruns path dynamic based on prompt for user input)
-$autoruns = 'C:\Users\David\Downloads\SysinternalsSuite\autorunsc.exe'
-$arguments = '-nobanner -a * -ct'
-$tmpfile = ($env:TEMP + '\autoruns_results.csv')
+#import the input
+$input_file = 'C:\Users\David\Desktop\MOBILE-PC.txt'
 $outfile_sysmon = ($env:TEMP + '\sysmon_autoruns_rules.xml')
 $outfile_splunk = ($env:TEMP + '\splunk_autoruns_inputs.conf')
+$input_lines = Get-Content $input_file
 
-# run autoruns and write stdout to CSV
-write-host ('Launching ' + $autoruns + ' with arguments ' + $arguments)
-start-Process -FilePath $autoruns -ArgumentList $arguments -RedirectStandardOutput $tmpfile -Wait
+$asep_locations = [System.Collections.ArrayList]@()
+#transform the input
+foreach ($line in $input_lines) {
 
-# read CSV into object and dedup entry locations
-$entries = Import-Csv -Path $tmpfile -Delimiter "`t" | Select-Object -Property 'Entry Location' -Unique
+    #exclude value entries
+    if (($line.Substring(0,1) -ne '+') -and ($line.substring(0,1) -ne 'X') -and ($line.substring(0,4) -ne '"WMI') -and ($line.substring(0,15) -ne '"Task Scheduler') ) {
 
+        # isolete the ASEP entry location from line
+        $line = ([regex]'"(.+?)"').match($line).Groups[1].Value
+
+        # only add unique values locations to array
+        if ($asep_locations.Contains($line) -eq $false) {
+            $asep_locations.Add($line) | Out-Null
+        }
+    }
+}
+
+$asep_locations = $asep_locations | Sort-Object
 
 $Keys = [System.Collections.ArrayList]@()
 
-if ($entries) {
+if ($asep_locations) {
 
-    foreach ($entry in $entries) {
-        # further reduce list to only include registry type entries
-        if ($entry.'Entry Location' -like 'HKLM*' -or $entry.'Entry Location' -like 'HKCU*') {
+    foreach ($entry in $asep_locations) {
+        # reduce list to only include registry type entries
+        if ($entry -like 'HKLM*' -or $entry -like 'HKCU*') {
 
             # strip off hklm\hkcu prefix to keys
-            $key = $entry.'Entry Location'
+            $key = $entry
             $key = $key -replace '^HKCU\\','\'
             $key = $key -replace '^HKLM\\','\'
 
@@ -40,11 +51,11 @@ if ($entries) {
         }
     }
 
-    if (Get-Item($outfile_sysmon)) {
+    if (Get-Item($outfile_sysmon) | Out-Null) {
         Remove-Item -path $outfile_sysmon -Force | Out-Null
     } 
 
-    if (Get-Item($outfile_splunk)) {
+    if (Get-Item($outfile_splunk) | Out-Null) {
         Remove-Item -path $outfile_splunk -Force | Out-Null
     }
 
@@ -80,3 +91,4 @@ if ($entries) {
     start-Process -FilePath ($env:windir + '\notepad.exe') -ArgumentList $outfile_splunk
 }
 
+write-host ([string]$keys.Count + ' registry-based asep mointoring rules created.')
