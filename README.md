@@ -1,8 +1,8 @@
 
 Synopsis:
 -----------------------------------
-Creates sysmon configuration xml or splunk inputs.conf for monitoring of autorun registry key changes.  
-Obtains list of autorun keys to monitor by transforming output of command line version of [sysinternals autoruns](https://technet.microsoft.com/en-us/sysinternals/bb963902). 
+
+Creates sysmon and splunk configuration files for monitoring of changes to auto start extensibility points (aseps) by transforming text-based output of sysinternals autoruns utility.
 
 ![alt tag](https://github.com/dstaulcu/AutorunsToSysmon/blob/master/Capture.JPG)
 
